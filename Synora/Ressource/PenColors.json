@@ -1,0 +1,70 @@
+{
+    "colors": [
+        {
+            "id": "primary",
+            "hex": "#111827",
+            "roles": [
+                "pen"
+            ],
+            "labels": {
+                "english": "Default",
+                "german": "Standard"
+            }
+        },
+        {
+            "id": "red",
+            "hex": "#EF4444",
+            "roles": [
+                "pen"
+            ],
+            "labels": {
+                "english": "Red",
+                "german": "Rot"
+            }
+        },
+        {
+            "id": "green",
+            "hex": "#22C55E",
+            "roles": [
+                "pen"
+            ],
+            "labels": {
+                "english": "Green",
+                "german": "Grün"
+            }
+        },
+        {
+            "id": "blue",
+            "hex": "#3B82F6",
+            "roles": [
+                "pen"
+            ],
+            "labels": {
+                "english": "Blue",
+                "german": "Blau"
+            }
+        },
+        {
+            "id": "purple",
+            "hex": "#8B5CF6",
+            "roles": [
+                "pen"
+            ],
+            "labels": {
+                "english": "Purple",
+                "german": "Lila"
+            }
+        },
+        {
+            "id": "pink",
+            "hex": "#EC4899",
+            "roles": [
+                "pen"
+            ],
+            "labels": {
+                "english": "Pink",
+                "german": "Pink"
+            }
+        }
+    ]
+}

@@ -1,0 +1,59 @@
+{
+    "colors": [
+        {
+            "id": "yellow",
+            "hex": "#FACC15",
+            "roles": [
+                "marker"
+            ],
+            "labels": {
+                "english": "Yellow",
+                "german": "Gelb"
+            }
+        },
+        {
+            "id": "orange",
+            "hex": "#FB923C",
+            "roles": [
+                "marker"
+            ],
+            "labels": {
+                "english": "Orange",
+                "german": "Orange"
+            }
+        },
+        {
+            "id": "green_marker",
+            "hex": "#86EFAC",
+            "roles": [
+                "marker"
+            ],
+            "labels": {
+                "english": "Mint",
+                "german": "Mint"
+            }
+        },
+        {
+            "id": "blue_marker",
+            "hex": "#93C5FD",
+            "roles": [
+                "marker"
+            ],
+            "labels": {
+                "english": "Sky",
+                "german": "Himmel"
+            }
+        },
+        {
+            "id": "pink_marker",
+            "hex": "#F9A8D4",
+            "roles": [
+                "marker"
+            ],
+            "labels": {
+                "english": "Rose",
+                "german": "Rosa"
+            }
+        }
+    ]
+}
