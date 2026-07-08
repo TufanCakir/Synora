@@ -10,10 +10,7 @@ import Foundation
 
 final class ReviewPromptManager: ObservableObject {
 
-    static let bundleIdentifier = "com.tufancakir.Synora"
-
-    // Replace this with the numeric App Store ID when Synora is live.
-    private static let appStoreID = ""
+    private static let appStoreID = "6770082322"
 
     private enum StorageKey {
         static let didPromptAfterFirstWrittenNote =

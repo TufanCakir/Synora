@@ -55,7 +55,7 @@ struct RootView: View {
             .tabItem {
                 Label(
                     viewModel.language.text(.settings),
-                    systemImage: "gearshape"
+                    systemImage: "gear"
                 )
             }
             .tag(RootTab.settings)
