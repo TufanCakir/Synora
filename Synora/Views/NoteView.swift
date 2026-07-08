@@ -47,7 +47,6 @@ struct NoteView: View {
                 editor
             }
         }
-        .navigationTitle(viewModel.language.text(.appTitle))
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
@@ -131,7 +130,6 @@ struct NoteView: View {
                 .onMove(perform: viewModel.moveTabs)
             }
         }
-        .navigationTitle(viewModel.language.text(.tabs))
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 EditButton()
@@ -182,7 +180,6 @@ struct NoteView: View {
                 }
             }
         }
-        .navigationTitle(viewModel.language.text(.notes))
         .searchable(
             text: $searchText,
             placement: .navigationBarDrawer(displayMode: .always),
@@ -500,7 +497,6 @@ private struct StartView: View {
                 }
             }
         }
-        .navigationTitle(viewModel.language.text(.start))
     }
 }
 

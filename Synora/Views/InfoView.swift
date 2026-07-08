@@ -6,16 +6,14 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct InfoView: View {
 
-    @AppStorage("language")
-
-    private var language =
-        Locale.current.language.languageCode?.identifier ?? "en"
+    let language: AppLanguage
 
     private var content: InfoContent {
-        Bundle.main.loadInfo(language: language)
+        Bundle.main.loadInfo(language: language.resourceCode)
     }
 
     var body: some View {
@@ -25,16 +23,16 @@ struct InfoView: View {
             ForEach(content.sections) { section in
                 infoSection(section)
             }
+
+            appDetailsSection
         }
         .listStyle(.insetGrouped)
-        .navigationTitle(content.title)
-        .navigationBarTitleDisplayMode(.inline)
     }
 
     private var headerSection: some View {
         Section {
             VStack(spacing: 8) {
-                Image(systemName: "arrow.trianglehead.2.clockwise.rotate.90")
+                Image(systemName: "note.text")
                     .font(.largeTitle)
 
                 Text(content.subtitle)
@@ -55,8 +53,41 @@ struct InfoView: View {
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
+
+    private var appDetailsSection: some View {
+        Section(language.text(.appInfo)) {
+            LabeledContent(language.text(.appVersion), value: appVersion)
+            LabeledContent(language.text(.buildNumber), value: buildNumber)
+            LabeledContent(
+                language.text(.iosVersion),
+                value: UIDevice.current.systemVersion
+            )
+            LabeledContent(
+                language.text(.device),
+                value: UIDevice.current.model
+            )
+        }
+    }
+
+    private var appVersion: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
+            ?? "1.0"
+    }
+
+    private var buildNumber: String {
+        Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
+    }
 }
 
 #Preview {
-    InfoView()
+    InfoView(language: .german)
+}
+
+extension AppLanguage {
+    fileprivate var resourceCode: String {
+        switch self {
+        case .german: return "de"
+        case .english: return "en"
+        }
+    }
 }

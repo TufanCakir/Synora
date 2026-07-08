@@ -38,8 +38,6 @@ struct SubscriptionView: View {
                 }
                 .padding()
             }
-            .navigationTitle("Synora Pro")
-            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(language == .german ? "Wiederherstellen" : "Restore")

@@ -7,13 +7,14 @@
 
 import StoreKit
 import SwiftUI
-import UIKit
 
 struct SettingsView: View {
+
     let viewModel: NotesViewModel
     var showsDoneButton = true
     var reviewPromptManager = ReviewPromptManager()
     var onShowSubscriptionPlans: () -> Void = {}
+
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
     @Environment(\.requestReview) private var requestReview
@@ -21,18 +22,14 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section {
+                Section(viewModel.language == .german ? "App" : "App") {
                     Button(action: onShowSubscriptionPlans) {
                         Label(
-                            viewModel.language == .german
-                                ? "Abo-Pläne ansehen"
-                                : "View subscription plans",
+                            subscriptionPlansTitle,
                             systemImage: "crown"
                         )
                     }
-                }
 
-                Section(viewModel.language.text(.language)) {
                     Picker(
                         viewModel.language.text(.language),
                         selection: languageBinding
@@ -41,9 +38,7 @@ struct SettingsView: View {
                         Text("English").tag(AppLanguage.english)
                     }
                     .pickerStyle(.segmented)
-                }
 
-                Section(viewModel.language.text(.theme)) {
                     Picker(
                         viewModel.language.text(.theme),
                         selection: themeBinding
@@ -57,7 +52,11 @@ struct SettingsView: View {
                     .pickerStyle(.segmented)
                 }
 
-                Section(viewModel.language.text(.accessibility)) {
+                Section(
+                    viewModel.language == .german
+                        ? "Lesen & Bedienung"
+                        : "Reading & Controls"
+                ) {
                     Toggle(
                         viewModel.language.text(.highContrast),
                         isOn: highContrastBinding
@@ -95,9 +94,12 @@ struct SettingsView: View {
                     }
                 }
 
-                Section(viewModel.language.text(.info)) {
+                Section(
+                    viewModel.language == .german
+                        ? "Info & Rechtliches" : "Info & Legal"
+                ) {
                     NavigationLink {
-                        AppInfoView(language: viewModel.language)
+                        InfoView(language: viewModel.language)
                     } label: {
                         Label(
                             viewModel.language.text(.appInfo),
@@ -109,15 +111,21 @@ struct SettingsView: View {
                         requestManualReview()
                     } label: {
                         Label(
-                            viewModel.language == .german
-                                ? "Synora bewerten"
-                                : "Rate Synora",
+                            reviewTitle,
                             systemImage: "star.bubble"
                         )
                     }
+
+                    if let appleTermsURL {
+                        Link(destination: appleTermsURL) {
+                            Label(
+                                termsTitle,
+                                systemImage: "doc.text"
+                            )
+                        }
+                    }
                 }
             }
-            .navigationTitle(viewModel.language.text(.settings))
             .toolbar {
                 if showsDoneButton {
                     ToolbarItem(placement: .topBarTrailing) {
@@ -128,6 +136,20 @@ struct SettingsView: View {
                 }
             }
         }
+    }
+
+    private var subscriptionPlansTitle: String {
+        viewModel.language == .german
+            ? "Abo-Pläne ansehen"
+            : "View subscription plans"
+    }
+
+    private var reviewTitle: String {
+        viewModel.language == .german ? "Synora bewerten" : "Rate Synora"
+    }
+
+    private var termsTitle: String {
+        viewModel.language == .german ? "Nutzungsbedingungen" : "Terms of Use"
     }
 
     private var languageBinding: Binding<AppLanguage> {
@@ -186,52 +208,19 @@ struct SettingsView: View {
         )
     }
 
+    private var appleTermsURL: URL? {
+        URL(
+            string:
+                "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
+        )
+    }
+
     private func requestManualReview() {
         if let writeReviewURL = reviewPromptManager.writeReviewURL {
             openURL(writeReviewURL)
         } else {
             requestReview()
         }
-    }
-}
-
-private struct AppInfoView: View {
-    let language: AppLanguage
-
-    var body: some View {
-        List {
-            Section(language.text(.features)) {
-                ForEach(
-                    AppContent.shared.infoBullets(language: language),
-                    id: \.self
-                ) { detail in
-                    Label(detail, systemImage: "checkmark.circle")
-                }
-            }
-
-            Section(language.text(.appInfo)) {
-                LabeledContent(language.text(.appVersion), value: appVersion)
-                LabeledContent(language.text(.buildNumber), value: buildNumber)
-                LabeledContent(
-                    language.text(.iosVersion),
-                    value: UIDevice.current.systemVersion
-                )
-                LabeledContent(
-                    language.text(.device),
-                    value: UIDevice.current.model
-                )
-            }
-        }
-        .navigationTitle(language.text(.appInfo))
-    }
-
-    private var appVersion: String {
-        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
-            ?? "1.0"
-    }
-
-    private var buildNumber: String {
-        Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
     }
 }
 

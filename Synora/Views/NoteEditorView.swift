@@ -82,8 +82,6 @@ struct NoteEditorView: View {
             .background(editorBackground)
         }
         .background(editorBackground)
-        .navigationTitle(title.isEmpty ? language.text(.newNote) : title)
-        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 Button {
