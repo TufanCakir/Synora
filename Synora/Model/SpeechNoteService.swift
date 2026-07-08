@@ -13,6 +13,7 @@ import Speech
 @MainActor
 @Observable
 final class SpeechNoteService {
+
     private(set) var isRecording = false
     var lastError: String?
 

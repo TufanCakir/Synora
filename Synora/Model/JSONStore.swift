@@ -8,6 +8,7 @@
 import Foundation
 
 struct JSONStore<Value: Codable> {
+
     let fileName: String
     let defaultValue: Value
 

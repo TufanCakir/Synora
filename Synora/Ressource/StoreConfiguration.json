@@ -1,0 +1,217 @@
+{
+    "freeLimits": {
+        "tabs": 5,
+        "notes": 5,
+        "storageMegabytes": 5,
+        "inboxItems": 5
+    },
+    "coinCosts": {
+        "tab": 5,
+        "note": 1,
+        "storageMegabyte": 2,
+        "inboxItem": 1
+    },
+    "products": [
+        {
+            "id": "free",
+            "kind": "free",
+            "displayNames": {
+                "german": "Kostenlos",
+                "english": "Free"
+            },
+            "subtitles": {
+                "german": "Basis-Version mit festen Limits",
+                "english": "Basic version with fixed limits"
+            },
+            "benefits": {
+                "german": [
+                    "5 Tabs",
+                    "5 Notizen",
+                    "5 MB Speicher",
+                    "5 Inbox-Einträge"
+                ],
+                "english": [
+                    "5 tabs",
+                    "5 notes",
+                    "5 MB storage",
+                    "5 inbox items"
+                ]
+            }
+        },
+        {
+            "id": "pro_monthly",
+            "kind": "subscription",
+            "productID": "synora.pro.monthly",
+            "limits": {
+                "tabs": 50,
+                "notes": 50,
+                "storageMegabytes": 50,
+                "inboxItems": 50
+            },
+            "displayNames": {
+                "german": "Synora Pro",
+                "english": "Synora Pro"
+            },
+            "subtitles": {
+                "german": "Mehr Platz für regelmäßige Nutzung",
+                "english": "More room for regular use"
+            },
+            "benefits": {
+                "german": [
+                    "+50 Tabs",
+                    "+50 Notizen",
+                    "+50 MB Speicher",
+                    "+50 Inbox-Einträge"
+                ],
+                "english": [
+                    "+50 tabs",
+                    "+50 notes",
+                    "+50 MB storage",
+                    "+50 inbox items"
+                ]
+            }
+        },
+        {
+            "id": "ultimate_monthly",
+            "kind": "subscription",
+            "productID": "synora.ultimate.monthly",
+            "limits": {
+                "tabs": 1000,
+                "notes": 1000,
+                "storageMegabytes": 1000,
+                "inboxItems": 1000
+            },
+            "displayNames": {
+                "german": "Synora Ultimate",
+                "english": "Synora Ultimate"
+            },
+            "subtitles": {
+                "german": "Sehr hohe Limits für große Sammlungen",
+                "english": "Very high limits for large collections"
+            },
+            "benefits": {
+                "german": [
+                    "+1000 Tabs",
+                    "+1000 Notizen",
+                    "+1000 MB Speicher",
+                    "+1000 Inbox-Einträge"
+                ],
+                "english": [
+                    "+1000 tabs",
+                    "+1000 notes",
+                    "+1000 MB storage",
+                    "+1000 inbox items"
+                ]
+            }
+        },
+        {
+            "id": "lifetime",
+            "kind": "nonConsumable",
+            "productID": "synora.lifetime",
+            "displayNames": {
+                "german": "Synora Lifetime",
+                "english": "Synora Lifetime"
+            },
+            "subtitles": {
+                "german": "Einmal kaufen, dauerhaft alles freischalten",
+                "english": "Buy once and unlock everything permanently"
+            },
+            "benefits": {
+                "german": [
+                    "Keine Abo-Zahlung",
+                    "Keine Limits für Tabs, Notizen und Speicher",
+                    "Dauerhafte Freischaltung"
+                ],
+                "english": [
+                    "No subscription",
+                    "No limits for tabs, notes, and storage",
+                    "Permanent unlock"
+                ]
+            }
+        },
+        {
+            "id": "coins_small",
+            "kind": "consumable",
+            "productID": "synora.coins.small",
+            "coinAmount": 25,
+            "displayNames": {
+                "german": "25 Coins",
+                "english": "25 Coins"
+            },
+            "subtitles": {
+                "german": "Erhöht Limits automatisch",
+                "english": "Automatically increases limits"
+            },
+            "benefits": {
+                "german": [
+                    "+5 Tabs",
+                    "+25 Notizen",
+                    "+12 MB Speicher",
+                    "+25 Inbox-Einträge"
+                ],
+                "english": [
+                    "+5 tabs",
+                    "+25 notes",
+                    "+12 MB storage",
+                    "+25 inbox items"
+                ]
+            }
+        },
+        {
+            "id": "coins_medium",
+            "kind": "consumable",
+            "productID": "synora.coins.medium",
+            "coinAmount": 50,
+            "displayNames": {
+                "german": "50 Coins",
+                "english": "50 Coins"
+            },
+            "subtitles": {
+                "german": "Mehr zusätzliche Limits",
+                "english": "More extra limits"
+            },
+            "benefits": {
+                "german": [
+                    "+10 Tabs",
+                    "+50 Notizen",
+                    "+25 MB Speicher",
+                    "+50 Inbox-Einträge"
+                ],
+                "english": [
+                    "+10 tabs",
+                    "+50 notes",
+                    "+25 MB storage",
+                    "+50 inbox items"
+                ]
+            }
+        },
+        {
+            "id": "coins_large",
+            "kind": "consumable",
+            "productID": "synora.coins.large",
+            "coinAmount": 100,
+            "displayNames": {
+                "german": "100 Coins",
+                "english": "100 Coins"
+            },
+            "subtitles": {
+                "german": "Großes Limit-Upgrade ohne Abo",
+                "english": "Large limit upgrade without a subscription"
+            },
+            "benefits": {
+                "german": [
+                    "+20 Tabs",
+                    "+100 Notizen",
+                    "+50 MB Speicher",
+                    "+100 Inbox-Einträge"
+                ],
+                "english": [
+                    "+20 tabs",
+                    "+100 notes",
+                    "+50 MB storage",
+                    "+100 inbox items"
+                ]
+            }
+        }
+    ]
+}

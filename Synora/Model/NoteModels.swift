@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct NotesDocument: Codable, Equatable {
+
     var tabs: [NoteTab]
 
     static let defaults =

@@ -1,0 +1,26 @@
+{
+    "title": "Synora",
+    "subtitle": "Notizen. Stimme. Struktur.",
+    "sections": [
+        {
+            "title": "Notizen klar organisieren",
+            "text":
+                "Erstelle Notizen und sortiere sie in Tabs, damit Ideen, Aufgaben und Gedanken getrennt bleiben."
+        },
+        {
+            "title": "Schnell schreiben und wiederfinden",
+            "text":
+                "Bearbeite Titel und Inhalte, nutze die Suche und springe direkt zu deinen letzten Notizen."
+        },
+        {
+            "title": "Sprache, Vorlesen und Fokus",
+            "text":
+                "Diktiere neue Inhalte, lasse Notizen vorlesen und arbeite im Fokus-Modus mit reduzierter Ablenkung."
+        },
+        {
+            "title": "Anpassbar und erweiterbar",
+            "text":
+                "Passe Farben, Marker, Schriftgröße und Bedienhilfen an. Mit Pro, Ultimate, Lifetime oder Coins erhöhst du deine Limits."
+        }
+    ]
+}

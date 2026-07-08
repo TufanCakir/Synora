@@ -8,6 +8,7 @@
 import Foundation
 
 enum BundleJSONLoader {
+
     static func load<T: Decodable>(_ type: T.Type, resource: String) -> T? {
         guard
             let url = Bundle.main.url(

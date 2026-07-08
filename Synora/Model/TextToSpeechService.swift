@@ -11,6 +11,7 @@ import Observation
 @MainActor
 @Observable
 final class TextToSpeechService {
+
     private let synthesizer = AVSpeechSynthesizer()
     private var completionTask: Task<Void, Never>?
     private(set) var isSpeaking = false

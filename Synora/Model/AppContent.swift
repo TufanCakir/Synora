@@ -8,6 +8,7 @@
 import Foundation
 
 struct AppContent: Decodable {
+
     let defaultSettings: UserSettings
     let localizations: [String: [String: String]]
     let appInfoBullets: [String: [String]]

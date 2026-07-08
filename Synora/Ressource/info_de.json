@@ -1,0 +1,32 @@
+{
+    "title": "Synora",
+    "subtitle": "Dein Notizraum für Ideen, Aufgaben und gesprochene Gedanken.",
+
+    "sections": [
+        {
+            "title": "Notizen und Tabs",
+            "text":
+                "Synora hilft dir, Inhalte schnell festzuhalten und sauber zu strukturieren. Erstelle mehrere Tabs für Themen, Projekte oder Lebensbereiche und lege darin deine Notizen ab. Tabs lassen sich umbenennen, sortieren und löschen, damit deine Sammlung übersichtlich bleibt."
+        },
+        {
+            "title": "Schreiben, Suchen und Bearbeiten",
+            "text":
+                "Bearbeite Titel und Inhalte direkt im Editor. Du kannst Textfarben, Markerfarben und Schriftgröße anpassen, wichtige Stellen markieren und Änderungen bei Bedarf rückgängig machen. Mit der Suche findest du Notizen über Titel und Inhalt schnell wieder."
+        },
+        {
+            "title": "Sprache und Vorlesen",
+            "text":
+                "Wenn Mikrofon und Spracherkennung erlaubt sind, kannst du neue Notizen diktieren oder bestehenden Text per Sprache ergänzen. Synora kann ganze Notizen, Auswahlen oder eine kurze Zusammenfassung vorlesen, damit du Inhalte auch unterwegs prüfen kannst."
+        },
+        {
+            "title": "Fokus, Barrierefreiheit und Teilen",
+            "text":
+                "Der Fokus-Modus reduziert Ablenkung beim Schreiben. Zusätzliche Einstellungen wie größere Schrift, größere Bedienelemente, höherer Kontrast, Zeilenabstand, haptisches Feedback und eine lesefreundliche Schrift helfen dir, Synora an deine Arbeitsweise anzupassen. Fertige Notizen teilst du über das native Apple-Teilen-Menü."
+        },
+        {
+            "title": "Limits und Upgrades",
+            "text":
+                "Die kostenlose Version enthält Limits für Tabs, Notizen, Speicher und Inbox. Mit Synora Pro erhältst du deutlich mehr Platz, Ultimate ist für große Sammlungen gedacht, und Lifetime schaltet alles dauerhaft ohne Limits frei. Coin-Pakete erhöhen deine Limits automatisch, ohne dass du ein Abo brauchst."
+        }
+    ]
+}

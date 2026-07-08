@@ -5,17 +5,33 @@
 //  Created by Tufan Cakir on 16.05.26.
 //
 
+import StoreKit
 import SwiftUI
 import UIKit
 
 struct SettingsView: View {
     let viewModel: NotesViewModel
     var showsDoneButton = true
+    var reviewPromptManager = ReviewPromptManager()
+    var onShowSubscriptionPlans: () -> Void = {}
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
+    @Environment(\.requestReview) private var requestReview
 
     var body: some View {
         NavigationStack {
             Form {
+                Section {
+                    Button(action: onShowSubscriptionPlans) {
+                        Label(
+                            viewModel.language == .german
+                                ? "Abo-Pläne ansehen"
+                                : "View subscription plans",
+                            systemImage: "crown"
+                        )
+                    }
+                }
+
                 Section(viewModel.language.text(.language)) {
                     Picker(
                         viewModel.language.text(.language),
@@ -88,6 +104,17 @@ struct SettingsView: View {
                             systemImage: "info.circle"
                         )
                     }
+
+                    Button {
+                        requestManualReview()
+                    } label: {
+                        Label(
+                            viewModel.language == .german
+                                ? "Synora bewerten"
+                                : "Rate Synora",
+                            systemImage: "star.bubble"
+                        )
+                    }
                 }
             }
             .navigationTitle(viewModel.language.text(.settings))
@@ -157,6 +184,14 @@ struct SettingsView: View {
             get: { viewModel.settings.hapticFeedback },
             set: { viewModel.setHapticFeedback($0) }
         )
+    }
+
+    private func requestManualReview() {
+        if let writeReviewURL = reviewPromptManager.writeReviewURL {
+            openURL(writeReviewURL)
+        } else {
+            requestReview()
+        }
     }
 }
 

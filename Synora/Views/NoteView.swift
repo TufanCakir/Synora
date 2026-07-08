@@ -5,16 +5,25 @@
 //  Created by Tufan Cakir on 16.05.26.
 //
 
+import StoreKit
 import SwiftUI
 
 struct NoteView: View {
+
     let viewModel: NotesViewModel
+    let storeViewModel: StoreViewModel
+    let reviewPromptManager: ReviewPromptManager
+
+    @Environment(\.requestReview) private var requestReview
+
     @State private var speechService = SpeechNoteService()
     @State private var isRenamingTab = false
     @State private var isShowingStart = true
     @State private var renamedTabTitle = ""
     @State private var searchText = ""
     @State private var voiceDraft = ""
+    @State private var limitAlertMessage = ""
+    @State private var isShowingLimitAlert = false
 
     var body: some View {
         NavigationSplitView {
@@ -27,12 +36,10 @@ struct NoteView: View {
                     viewModel: viewModel,
                     noteRows: allNoteRows,
                     onNewNote: {
-                        viewModel.addNote()
-                        isShowingStart = false
+                        addNoteIfAllowed()
                     },
                     onNewTab: {
-                        viewModel.addTab()
-                        isShowingStart = false
+                        addTabIfAllowed()
                     },
                     onSelectNote: selectNote
                 )
@@ -67,6 +74,14 @@ struct NoteView: View {
             Button("OK", role: .cancel) {}
         } message: {
             Text(speechService.lastError ?? "")
+        }
+        .alert(
+            storeViewModel.limitTitle(language: viewModel.language),
+            isPresented: $isShowingLimitAlert
+        ) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(limitAlertMessage)
         }
     }
 
@@ -123,7 +138,7 @@ struct NoteView: View {
             }
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
-                    viewModel.addTab()
+                    addTabIfAllowed()
                 } label: {
                     Label(viewModel.language.text(.addTab), systemImage: "plus")
                 }
@@ -205,8 +220,7 @@ struct NoteView: View {
                 }
 
                 Button {
-                    viewModel.addNote()
-                    isShowingStart = false
+                    addNoteIfAllowed()
                 } label: {
                     Label(
                         viewModel.language.text(.addNote),
@@ -224,11 +238,26 @@ struct NoteView: View {
                 note: displayNote(note),
                 settings: viewModel.settings
             ) { title, body, style in
+                let storageAfterUpdate =
+                    viewModel.storageMegabytesAfterUpdatingSelectedNote(
+                        title: title,
+                        body: body
+                    )
+                guard
+                    storeViewModel.canStore(
+                        storageMegabytes: storageAfterUpdate
+                    )
+                else {
+                    showLimitAlert(for: .storage)
+                    return
+                }
+
                 viewModel.updateSelectedNote(
                     title: title,
                     body: body,
                     style: style
                 )
+                requestReviewIfNeeded(title: title, body: body)
             }
         } else {
             ContentUnavailableView(
@@ -321,8 +350,7 @@ struct NoteView: View {
     private func toggleVoiceInput() {
         if speechService.isRecording {
             speechService.stop()
-            viewModel.addVoiceNote(text: voiceDraft)
-            isShowingStart = false
+            addVoiceNoteIfAllowed(text: voiceDraft)
             voiceDraft = ""
         } else {
             voiceDraft = ""
@@ -330,6 +358,87 @@ struct NoteView: View {
                 voiceDraft = text
             }
         }
+    }
+
+    private func addTabIfAllowed() {
+        guard storeViewModel.canCreateTab(currentTabs: viewModel.tabCount)
+        else {
+            showLimitAlert(for: .tabs)
+            return
+        }
+
+        viewModel.addTab()
+        isShowingStart = false
+    }
+
+    private func addNoteIfAllowed() {
+        guard canCreateNote() else {
+            return
+        }
+
+        viewModel.addNote()
+        isShowingStart = false
+    }
+
+    private func addVoiceNoteIfAllowed(text: String) {
+        guard canCreateNote() else {
+            return
+        }
+
+        viewModel.addVoiceNote(text: text)
+        isShowingStart = false
+    }
+
+    private func canCreateNote() -> Bool {
+        guard
+            storeViewModel.canCreateNote(
+                currentNotes: viewModel.noteCount,
+                currentStorageMegabytes: viewModel.storageMegabytesUsed
+            )
+        else {
+            let resource: SynoraLimitResource =
+                viewModel.noteCount >= storeViewModel.effectiveLimits.notes
+                ? .notes : .storage
+            showLimitAlert(for: resource)
+            return false
+        }
+
+        return true
+    }
+
+    private func showLimitAlert(for resource: SynoraLimitResource) {
+        limitAlertMessage = storeViewModel.limitMessage(
+            for: resource,
+            language: viewModel.language
+        )
+        isShowingLimitAlert = true
+    }
+
+    private func requestReviewIfNeeded(title: String, body: String) {
+        guard isMeaningfulWrittenNote(title: title, body: body) else {
+            return
+        }
+
+        guard reviewPromptManager.shouldRequestReviewAfterFirstWrittenNote()
+        else {
+            return
+        }
+
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(1))
+            requestReview()
+        }
+    }
+
+    private func isMeaningfulWrittenNote(title: String, body: String) -> Bool {
+        let cleanedBody = body.trimmingCharacters(in: .whitespacesAndNewlines)
+        if cleanedBody.count >= 3 {
+            return true
+        }
+
+        let cleanedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        let defaultTitles = Set(AppContent.shared.texts(for: .newNote))
+        return cleanedTitle.count >= 3 && !defaultTitles.contains(cleanedTitle)
     }
 }
 
@@ -396,5 +505,9 @@ private struct StartView: View {
 }
 
 #Preview {
-    NoteView(viewModel: NotesViewModel())
+    NoteView(
+        viewModel: NotesViewModel(),
+        storeViewModel: StoreViewModel(configuration: .fallback),
+        reviewPromptManager: ReviewPromptManager()
+    )
 }

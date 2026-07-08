@@ -11,7 +11,9 @@ import Observation
 @MainActor
 @Observable
 final class NotesViewModel {
+
     private(set) var document: NotesDocument
+
     var settings: UserSettings {
         didSet { settingsStore.save(settings) }
     }
@@ -38,6 +40,32 @@ final class NotesViewModel {
     }
 
     var language: AppLanguage { settings.language }
+
+    var tabCount: Int {
+        document.tabs.count
+    }
+
+    var noteCount: Int {
+        document.tabs.reduce(0) { $0 + $1.notes.count }
+    }
+
+    var storageMegabytesUsed: Int {
+        storageMegabytes(for: document)
+    }
+
+    func storageMegabytesAfterUpdatingSelectedNote(
+        title: String,
+        body: String
+    ) -> Int {
+        guard let location = selectedNoteLocation else {
+            return storageMegabytesUsed
+        }
+
+        var updatedDocument = document
+        updatedDocument.tabs[location.tab].notes[location.note].title = title
+        updatedDocument.tabs[location.tab].notes[location.note].body = body
+        return storageMegabytes(for: updatedDocument)
+    }
 
     var selectedTab: NoteTab? {
         guard let selectedTabID else { return nil }
@@ -316,5 +344,15 @@ final class NotesViewModel {
 
     private func saveNotes() {
         notesStore.save(document)
+    }
+
+    private func storageMegabytes(for document: NotesDocument) -> Int {
+        let bytes = document.tabs.reduce(0) { total, tab in
+            total + tab.title.utf8.count
+                + tab.notes.reduce(0) { noteTotal, note in
+                    noteTotal + note.title.utf8.count + note.body.utf8.count
+                }
+        }
+        return max(Int(ceil(Double(bytes) / 1_000_000)), bytes > 0 ? 1 : 0)
     }
 }

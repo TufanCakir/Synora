@@ -1,18 +1,18 @@
 {
     "appInfoBullets": {
         "english": [
-            "Create notes and organize them in multiple tabs.",
-            "Edit titles, note text, text colors, marker colors, and font size.",
-            "Search notes, reorder them, rename tabs, and delete old content.",
-            "Add notes with voice input when microphone and speech permissions are enabled.",
-            "Share notes with the native Apple share sheet."
+            "Create notes and organize ideas, tasks, and projects in tabs.",
+            "Edit titles, body text, text colors, marker colors, and font size.",
+            "Search notes, reorder content, rename tabs, and clean up old entries.",
+            "Dictate notes, add spoken text, and listen to notes or summaries.",
+            "Upgrade limits with Pro, Ultimate, Lifetime, or automatic coin bonuses."
         ],
         "german": [
-            "Notizen erstellen und in mehreren Tabs organisieren.",
+            "Notizen erstellen und Ideen, Aufgaben und Projekte in Tabs organisieren.",
             "Titel, Inhalt, Textfarben, Markerfarben und Schriftgröße bearbeiten.",
-            "Notizen durchsuchen, neu ordnen, Tabs umbenennen und alte Inhalte löschen.",
-            "Notizen per Spracheingabe hinzufügen, wenn Mikrofon und Spracherkennung erlaubt sind.",
-            "Notizen über das native Apple-Teilen-Menü weitergeben."
+            "Notizen durchsuchen, Inhalte sortieren, Tabs umbenennen und alte Einträge löschen.",
+            "Notizen diktieren, gesprochenen Text ergänzen und Notizen oder Zusammenfassungen vorlesen lassen.",
+            "Limits mit Pro, Ultimate, Lifetime oder automatischen Coin-Boni erweitern."
         ]
     },
     "defaultSettings": {
@@ -42,7 +42,7 @@
             "clearNote": "Clear note text",
             "dark": "Dark",
             "defaultWelcomeBody":
-                "Start here with your first note. You can change text color, marker color, font size, and use voice features.",
+                "Start with your first note. Organize it in tabs, adjust colors and font size, use voice features, and expand limits when your collection grows.",
             "defaultWelcomeTitle": "Welcome",
             "delete": "Delete",
             "device": "Device",
@@ -113,7 +113,7 @@
             "clearNote": "Notiztext leeren",
             "dark": "Dunkel",
             "defaultWelcomeBody":
-                "Starte hier mit deiner ersten Notiz. Du kannst Textfarbe, Markerfarbe, Schriftgröße und Sprachfunktionen nutzen.",
+                "Starte mit deiner ersten Notiz. Organisiere sie in Tabs, passe Farben und Schriftgröße an, nutze Sprachfunktionen und erweitere Limits, wenn deine Sammlung wächst.",
             "defaultWelcomeTitle": "Willkommen",
             "delete": "Löschen",
             "device": "Gerät",

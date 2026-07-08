@@ -1,0 +1,32 @@
+{
+    "title": "Synora",
+    "subtitle": "Your note space for ideas, tasks, and spoken thoughts.",
+
+    "sections": [
+        {
+            "title": "Notes and tabs",
+            "text":
+                "Synora helps you capture content quickly and keep it structured. Create multiple tabs for topics, projects, or areas of life, then store your notes inside them. Tabs can be renamed, reordered, and deleted so your collection stays tidy."
+        },
+        {
+            "title": "Write, search, and edit",
+            "text":
+                "Edit titles and content directly in the editor. You can adjust text colors, marker colors, and font size, highlight important parts, and undo changes when needed. Search helps you find notes again by title or body text."
+        },
+        {
+            "title": "Voice and reading",
+            "text":
+                "When microphone and speech recognition permissions are enabled, you can dictate new notes or add spoken text to existing content. Synora can read full notes, selected text, or a short summary aloud so you can review content on the go."
+        },
+        {
+            "title": "Focus, accessibility, and sharing",
+            "text":
+                "Focus mode reduces distractions while writing. Extra settings such as larger text, larger controls, higher contrast, line spacing, haptic feedback, and a reading-friendly font help you adapt Synora to the way you work. Finished notes can be shared with the native Apple share sheet."
+        },
+        {
+            "title": "Limits and upgrades",
+            "text":
+                "The free version includes limits for tabs, notes, storage, and inbox. Synora Pro gives you much more room, Ultimate is built for large collections, and Lifetime permanently unlocks everything with no limits. Coin packs automatically increase your limits without requiring a subscription."
+        }
+    ]
+}

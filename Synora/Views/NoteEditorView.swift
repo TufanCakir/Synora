@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct NoteEditorView: View {
+
     @Environment(\.colorScheme) private var colorScheme
 
     let note: Note

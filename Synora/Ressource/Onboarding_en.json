@@ -1,0 +1,26 @@
+{
+    "title": "Synora",
+    "subtitle": "Notes. Voice. Structure.",
+    "sections": [
+        {
+            "title": "Organize notes clearly",
+            "text":
+                "Create notes and sort them into tabs so ideas, tasks, and thoughts stay separated."
+        },
+        {
+            "title": "Write fast and find things again",
+            "text":
+                "Edit titles and content, use search, and jump straight back into your recent notes."
+        },
+        {
+            "title": "Voice, reading, and focus",
+            "text":
+                "Dictate new content, have notes read aloud, and work in focus mode with fewer distractions."
+        },
+        {
+            "title": "Customizable and expandable",
+            "text":
+                "Adjust colors, markers, font size, and accessibility settings. Pro, Ultimate, Lifetime, or coins increase your limits."
+        }
+    ]
+}
