@@ -116,8 +116,17 @@ struct SettingsView: View {
                         )
                     }
 
-                    if let appleTermsURL {
-                        Link(destination: appleTermsURL) {
+                    if let privacyPolicyURL = LegalLinks.privacyPolicyURL {
+                        Link(destination: privacyPolicyURL) {
+                            Label(
+                                privacyTitle,
+                                systemImage: "hand.raised"
+                            )
+                        }
+                    }
+
+                    if let termsURL = LegalLinks.termsURL {
+                        Link(destination: termsURL) {
                             Label(
                                 termsTitle,
                                 systemImage: "doc.text"
@@ -150,6 +159,12 @@ struct SettingsView: View {
 
     private var termsTitle: String {
         viewModel.language == .german ? "Nutzungsbedingungen" : "Terms of Use"
+    }
+
+    private var privacyTitle: String {
+        viewModel.language == .german
+            ? "Datenschutzerklärung"
+            : "Privacy Policy"
     }
 
     private var languageBinding: Binding<AppLanguage> {
@@ -208,13 +223,6 @@ struct SettingsView: View {
         )
     }
 
-    private var appleTermsURL: URL? {
-        URL(
-            string:
-                "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
-        )
-    }
-
     private func requestManualReview() {
         if let writeReviewURL = reviewPromptManager.writeReviewURL {
             openURL(writeReviewURL)
@@ -226,4 +234,15 @@ struct SettingsView: View {
 
 #Preview {
     SettingsView(viewModel: NotesViewModel())
+}
+
+enum LegalLinks {
+    static let privacyPolicyURL = URL(
+        string: "https://synoraprivacy.tufancakir.com/"
+    )
+
+    static let termsURL = URL(
+        string:
+            "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
+    )
 }

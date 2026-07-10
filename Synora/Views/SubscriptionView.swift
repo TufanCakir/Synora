@@ -30,6 +30,8 @@ struct SubscriptionView: View {
                         productCard(for: definition)
                     }
 
+                    subscriptionDisclosure
+
                     if !storeViewModel.statusMessage.isEmpty {
                         Text(storeViewModel.statusMessage)
                             .font(.footnote)
@@ -178,6 +180,8 @@ struct SubscriptionView: View {
                 }
             }
 
+            productRequiredInformation(for: definition)
+
             if definition.kind != .free {
                 Button {
                     Task {
@@ -215,6 +219,139 @@ struct SubscriptionView: View {
             Color(.secondarySystemGroupedBackground),
             in: RoundedRectangle(cornerRadius: 8)
         )
+    }
+
+    private func productRequiredInformation(
+        for definition: StoreProductDefinition
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 5) {
+            requiredInfoRow(
+                title: language == .german ? "Preis" : "Price",
+                value: storeViewModel.priceText(for: definition)
+            )
+
+            requiredInfoRow(
+                title: language == .german ? "Laufzeit" : "Duration",
+                value: durationText(for: definition)
+            )
+
+            if definition.kind == .subscription {
+                Text(includedDuringSubscriptionText(for: definition))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(.top, 2)
+    }
+
+    private func requiredInfoRow(title: String, value: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
+            Text("\(title):")
+                .font(.caption.weight(.semibold))
+            Text(value)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private func durationText(for definition: StoreProductDefinition) -> String
+    {
+        switch definition.kind {
+        case .free:
+            return language == .german ? "Kostenlos" : "Free"
+        case .subscription:
+            if definition.id.contains("monthly") {
+                return language == .german
+                    ? "Monatlich, automatisch verlängerbar"
+                    : "Monthly, auto-renewing"
+            }
+            return language == .german
+                ? "Automatisch verlängerbar"
+                : "Auto-renewing"
+        case .nonConsumable:
+            return language == .german ? "Einmaliger Kauf" : "One-time purchase"
+        case .consumable:
+            return language == .german
+                ? "Einmaliges Coin-Paket" : "One-time coin pack"
+        }
+    }
+
+    private func includedDuringSubscriptionText(
+        for definition: StoreProductDefinition
+    ) -> String {
+        let benefits = definition.localizedBenefits(
+            languageID: language.rawValue,
+            fallbackLanguageID: AppLanguage.english.rawValue
+        )
+        .joined(separator: ", ")
+
+        if language == .german {
+            return "Enthalten während jedes Abo-Zeitraums: \(benefits)."
+        }
+
+        return "Included during each subscription period: \(benefits)."
+    }
+
+    private var subscriptionDisclosure: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(language == .german ? "Abo-Hinweise" : "Subscription details")
+                .font(.headline)
+
+            VStack(alignment: .leading, spacing: 6) {
+                disclosureRow(
+                    language == .german
+                        ? "Synora Pro und Synora Ultimate sind monatliche, automatisch verlängerbare Abos."
+                        : "Synora Pro and Synora Ultimate are monthly auto-renewing subscriptions."
+                )
+                disclosureRow(
+                    language == .german
+                        ? "Während jedes bezahlten Monats gelten die oben angezeigten Limits und Leistungen."
+                        : "During each paid month, the limits and benefits shown above are available."
+                )
+                disclosureRow(
+                    language == .german
+                        ? "Der Preis wird vor dem Kauf angezeigt. Abos verlängern sich automatisch, bis sie gekündigt werden."
+                        : "The price is shown before purchase. Subscriptions renew automatically until canceled."
+                )
+                disclosureRow(
+                    language == .german
+                        ? "Abos können nach dem Kauf in den Kontoeinstellungen verwaltet und gekündigt werden."
+                        : "Subscriptions can be managed and canceled in account settings after purchase."
+                )
+            }
+
+            HStack(spacing: 16) {
+                if let privacyPolicyURL = LegalLinks.privacyPolicyURL {
+                    Link(
+                        language == .german
+                            ? "Datenschutzerklärung" : "Privacy Policy",
+                        destination: privacyPolicyURL
+                    )
+                }
+
+                if let termsURL = LegalLinks.termsURL {
+                    Link(
+                        language == .german
+                            ? "Nutzungsbedingungen" : "Terms of Use",
+                        destination: termsURL
+                    )
+                }
+            }
+            .font(.footnote)
+        }
+        .font(.caption)
+        .foregroundStyle(.secondary)
+        .padding(12)
+        .background(
+            Color(.secondarySystemGroupedBackground),
+            in: RoundedRectangle(cornerRadius: 8)
+        )
+    }
+
+    private func disclosureRow(_ text: String) -> some View {
+        Label(text, systemImage: "checkmark.circle")
+            .fixedSize(horizontal: false, vertical: true)
     }
 }
 

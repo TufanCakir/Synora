@@ -13,53 +13,56 @@ struct NoteView: View {
     let viewModel: NotesViewModel
     let storeViewModel: StoreViewModel
     let reviewPromptManager: ReviewPromptManager
+    var onShowSubscriptionPlans: () -> Void = {}
 
     @Environment(\.requestReview) private var requestReview
 
-    @State private var speechService = SpeechNoteService()
+    @State private var path = NavigationPath()
     @State private var isRenamingTab = false
-    @State private var isShowingStart = true
     @State private var renamedTabTitle = ""
     @State private var searchText = ""
-    @State private var voiceDraft = ""
     @State private var limitAlertMessage = ""
     @State private var isShowingLimitAlert = false
+    @State private var isShowingSettings = false
+
+    private enum Route: Hashable {
+        case editor(Note.ID)
+        case tabs
+        case notes
+    }
 
     var body: some View {
-        NavigationSplitView {
-            tabList
-        } content: {
-            noteList
-        } detail: {
-            if isShowingStart {
-                StartView(
-                    viewModel: viewModel,
-                    noteRows: allNoteRows,
-                    onNewNote: {
-                        addNoteIfAllowed()
-                    },
-                    onNewTab: {
-                        addTabIfAllowed()
-                    },
-                    onSelectNote: selectNote
-                )
-            } else {
-                editor
+        NavigationStack(path: $path) {
+            StartView(
+                viewModel: viewModel,
+                noteRows: allNoteRows,
+                onNewNote: {
+                    addNoteIfAllowed()
+                },
+                onNewTab: {
+                    addTabIfAllowed()
+                },
+                onSelectNote: selectNote,
+                onSettings: {
+                    isShowingSettings = true
+                },
+                onShowTabs: {
+                    path.append(Route.tabs)
+                }
+            )
+            .navigationDestination(for: Route.self) { route in
+                destination(for: route)
             }
         }
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    toggleVoiceInput()
-                } label: {
-                    Label(
-                        viewModel.language.text(.voice),
-                        systemImage: speechService.isRecording
-                            ? "waveform.circle.fill" : "mic"
-                    )
+        .sheet(isPresented: $isShowingSettings) {
+            SettingsView(
+                viewModel: viewModel,
+                reviewPromptManager: reviewPromptManager,
+                onShowSubscriptionPlans: {
+                    isShowingSettings = false
+                    onShowSubscriptionPlans()
                 }
-                .tint(speechService.isRecording ? .red : nil)
-            }
+            )
         }
         .alert(viewModel.language.text(.rename), isPresented: $isRenamingTab) {
             TextField(viewModel.language.text(.title), text: $renamedTabTitle)
@@ -67,12 +70,6 @@ struct NoteView: View {
                 viewModel.renameSelectedTab(to: renamedTabTitle)
             }
             Button(viewModel.language.text(.cancel), role: .cancel) {}
-        }
-        .alert(viewModel.language.text(.voice), isPresented: voiceErrorBinding)
-        {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text(speechService.lastError ?? "")
         }
         .alert(
             storeViewModel.limitTitle(language: viewModel.language),
@@ -84,24 +81,31 @@ struct NoteView: View {
         }
     }
 
-    private var tabList: some View {
-        List(selection: selectedTabBinding) {
-            Section {
-                Button {
-                    isShowingStart = true
-                    viewModel.selectedNoteID = nil
-                } label: {
-                    Label(viewModel.language.text(.start), systemImage: "house")
-                }
-            }
+    @ViewBuilder
+    private func destination(for route: Route) -> some View {
+        switch route {
+        case .editor:
+            editor
+        case .tabs:
+            tabList
+        case .notes:
+            noteList
+        }
+    }
 
+    private var tabList: some View {
+        List {
             Section(viewModel.language.text(.tabs)) {
                 ForEach(viewModel.document.tabs) { tab in
-                    Label(
-                        viewModel.displayTitle(for: tab),
-                        systemImage: "folder"
-                    )
-                    .tag(tab.id)
+                    Button {
+                        viewModel.selectedTabID = tab.id
+                        path.append(Route.notes)
+                    } label: {
+                        Label(
+                            viewModel.displayTitle(for: tab),
+                            systemImage: "folder"
+                        )
+                    }
                     .contextMenu {
                         Button(
                             viewModel.language.text(.rename),
@@ -145,19 +149,23 @@ struct NoteView: View {
     }
 
     private var noteList: some View {
-        List(selection: selectedNoteBinding) {
+        List {
             Section(selectedTabTitle) {
                 ForEach(filteredSelectedNotes) { note in
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(viewModel.displayTitle(for: note))
-                            .font(.headline)
-                            .foregroundStyle(note.style.textColor.color)
-                        let displayBody = viewModel.displayBody(for: note)
-                        if !displayBody.isEmpty {
-                            Text(displayBody)
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                                .lineLimit(2)
+                    Button {
+                        selectNote(note)
+                    } label: {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(viewModel.displayTitle(for: note))
+                                .font(.headline)
+                                .foregroundStyle(note.style.textColor.color)
+                            let displayBody = viewModel.displayBody(for: note)
+                            if !displayBody.isEmpty {
+                                Text(displayBody)
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(2)
+                            }
                         }
                     }
                     .padding(.vertical, 4)
@@ -166,11 +174,6 @@ struct NoteView: View {
                             ? note.style.markerColor.color.opacity(0.18)
                             : Color.clear
                     )
-                    .tag(note.id)
-                    .onTapGesture {
-                        viewModel.selectedNoteID = note.id
-                        isShowingStart = false
-                    }
                 }
                 .onDelete(perform: viewModel.deleteNotes)
                 .onMove(perform: viewModel.moveNotes)
@@ -191,15 +194,6 @@ struct NoteView: View {
             }
             ToolbarItemGroup(placement: .topBarTrailing) {
                 Menu {
-                    Button {
-                        isShowingStart = true
-                    } label: {
-                        Label(
-                            viewModel.language.text(.start),
-                            systemImage: "house"
-                        )
-                    }
-
                     Section(viewModel.language.text(.allNotes)) {
                         ForEach(allNoteRows) { row in
                             Button {
@@ -265,36 +259,6 @@ struct NoteView: View {
         }
     }
 
-    private var voiceErrorBinding: Binding<Bool> {
-        Binding(
-            get: { speechService.lastError != nil },
-            set: { isPresented in
-                if !isPresented {
-                    speechService.lastError = nil
-                }
-            }
-        )
-    }
-
-    private var selectedTabBinding: Binding<NoteTab.ID?> {
-        Binding(
-            get: { viewModel.selectedTabID },
-            set: { viewModel.selectedTabID = $0 }
-        )
-    }
-
-    private var selectedNoteBinding: Binding<Note.ID?> {
-        Binding(
-            get: { viewModel.selectedNoteID },
-            set: {
-                viewModel.selectedNoteID = $0
-                if $0 != nil {
-                    isShowingStart = false
-                }
-            }
-        )
-    }
-
     private var filteredSelectedNotes: [Note] {
         let notes = viewModel.selectedTab?.notes ?? []
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -341,20 +305,12 @@ struct NoteView: View {
     private func selectNote(_ row: NoteMenuRow) {
         viewModel.selectedTabID = row.tabID
         viewModel.selectedNoteID = row.note.id
-        isShowingStart = false
+        path.append(Route.editor(row.note.id))
     }
 
-    private func toggleVoiceInput() {
-        if speechService.isRecording {
-            speechService.stop()
-            addVoiceNoteIfAllowed(text: voiceDraft)
-            voiceDraft = ""
-        } else {
-            voiceDraft = ""
-            speechService.start(language: viewModel.language) { text in
-                voiceDraft = text
-            }
-        }
+    private func selectNote(_ note: Note) {
+        viewModel.selectedNoteID = note.id
+        path.append(Route.editor(note.id))
     }
 
     private func addTabIfAllowed() {
@@ -365,7 +321,7 @@ struct NoteView: View {
         }
 
         viewModel.addTab()
-        isShowingStart = false
+        path.append(Route.notes)
     }
 
     private func addNoteIfAllowed() {
@@ -374,16 +330,9 @@ struct NoteView: View {
         }
 
         viewModel.addNote()
-        isShowingStart = false
-    }
-
-    private func addVoiceNoteIfAllowed(text: String) {
-        guard canCreateNote() else {
-            return
+        if let selectedNoteID = viewModel.selectedNoteID {
+            path.append(Route.editor(selectedNoteID))
         }
-
-        viewModel.addVoiceNote(text: text)
-        isShowingStart = false
     }
 
     private func canCreateNote() -> Bool {
@@ -454,6 +403,8 @@ private struct StartView: View {
     let onNewNote: () -> Void
     let onNewTab: () -> Void
     let onSelectNote: (NoteMenuRow) -> Void
+    let onSettings: () -> Void
+    let onShowTabs: () -> Void
 
     var body: some View {
         List {
@@ -497,6 +448,23 @@ private struct StartView: View {
                 }
             }
         }
+        .toolbar {
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                Button(action: onShowTabs) {
+                    Label(
+                        viewModel.language.text(.tabs),
+                        systemImage: "folder"
+                    )
+                }
+
+                Button(action: onSettings) {
+                    Label(
+                        viewModel.language.text(.settings),
+                        systemImage: "gear"
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -504,6 +472,7 @@ private struct StartView: View {
     NoteView(
         viewModel: NotesViewModel(),
         storeViewModel: StoreViewModel(configuration: .fallback),
-        reviewPromptManager: ReviewPromptManager()
+        reviewPromptManager: ReviewPromptManager(),
+        onShowSubscriptionPlans: {}
     )
 }

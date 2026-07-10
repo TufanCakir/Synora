@@ -21,7 +21,10 @@ struct RootView: View {
             NoteView(
                 viewModel: viewModel,
                 storeViewModel: storeViewModel,
-                reviewPromptManager: reviewPromptManager
+                reviewPromptManager: reviewPromptManager,
+                onShowSubscriptionPlans: {
+                    selectedTab = .subscription
+                }
             )
             .tabItem {
                 Label(
