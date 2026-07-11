@@ -135,6 +135,16 @@ final class NotesViewModel {
         saveNotes()
     }
 
+    func deleteTab(id: NoteTab.ID) {
+        guard
+            let index = document.tabs.firstIndex(where: { $0.id == id })
+        else {
+            return
+        }
+
+        deleteTabs(at: IndexSet(integer: index))
+    }
+
     func moveTabs(from source: IndexSet, to destination: Int) {
         moveItems(in: &document.tabs, from: source, to: destination)
         saveNotes()
@@ -189,6 +199,122 @@ final class NotesViewModel {
             self.selectedNoteID = document.tabs[tabIndex].notes.first?.id
         }
 
+        saveNotes()
+    }
+
+    func deleteNote(id: Note.ID) {
+        guard
+            let tabIndex = selectedTabIndex,
+            let noteIndex = document.tabs[tabIndex].notes.firstIndex(
+                where: { $0.id == id }
+            )
+        else {
+            return
+        }
+
+        deleteNotes(at: IndexSet(integer: noteIndex))
+    }
+
+    func deleteNote(id: Note.ID, in tabID: NoteTab.ID) {
+        guard
+            let tabIndex = document.tabs.firstIndex(where: { $0.id == tabID }),
+            let noteIndex = document.tabs[tabIndex].notes.firstIndex(
+                where: { $0.id == id }
+            )
+        else {
+            return
+        }
+
+        document.tabs[tabIndex].notes.remove(at: noteIndex)
+        if selectedNoteID == id {
+            selectedNoteID = document.tabs[tabIndex].notes.first?.id
+        }
+        saveNotes()
+    }
+
+    func renameNote(id: Note.ID, in tabID: NoteTab.ID, to title: String) {
+        guard
+            let tabIndex = document.tabs.firstIndex(where: { $0.id == tabID }),
+            let noteIndex = document.tabs[tabIndex].notes.firstIndex(
+                where: { $0.id == id }
+            )
+        else {
+            return
+        }
+
+        document.tabs[tabIndex].notes[noteIndex].title = clean(
+            title,
+            fallback: language.text(.newNote)
+        )
+        document.tabs[tabIndex].notes[noteIndex].titleKey = nil
+        document.tabs[tabIndex].notes[noteIndex].updatedAt = .now
+        saveNotes()
+    }
+
+    func moveNote(
+        id: Note.ID,
+        from sourceTabID: NoteTab.ID,
+        to targetTabID: NoteTab.ID,
+        before targetNoteID: Note.ID?
+    ) {
+        guard
+            let sourceTabIndex = document.tabs.firstIndex(
+                where: { $0.id == sourceTabID }
+            ),
+            let sourceNoteIndex = document.tabs[sourceTabIndex].notes
+                .firstIndex(
+                    where: { $0.id == id }
+                ),
+            let targetTabIndex = document.tabs.firstIndex(
+                where: { $0.id == targetTabID }
+            )
+        else {
+            return
+        }
+
+        let note = document.tabs[sourceTabIndex].notes.remove(
+            at: sourceNoteIndex
+        )
+        let insertionIndex: Int
+        if let targetNoteID,
+            let targetIndex = document.tabs[targetTabIndex].notes.firstIndex(
+                where: { $0.id == targetNoteID }
+            )
+        {
+            insertionIndex = targetIndex
+        } else {
+            insertionIndex = document.tabs[targetTabIndex].notes.endIndex
+        }
+
+        document.tabs[targetTabIndex].notes.insert(note, at: insertionIndex)
+        selectedTabID = targetTabID
+        selectedNoteID = note.id
+        saveNotes()
+    }
+
+    func moveSelectedNote(to targetTabID: NoteTab.ID) {
+        guard
+            let sourceTabIndex = selectedTabIndex,
+            let selectedNoteID,
+            let sourceNoteIndex = document.tabs[sourceTabIndex].notes
+                .firstIndex(
+                    where: { $0.id == selectedNoteID }
+                ),
+            let targetTabIndex = document.tabs.firstIndex(
+                where: { $0.id == targetTabID }
+            )
+        else {
+            return
+        }
+
+        guard sourceTabIndex != targetTabIndex else { return }
+
+        let note = document.tabs[sourceTabIndex].notes.remove(
+            at: sourceNoteIndex
+        )
+        document.tabs[targetTabIndex].notes.insert(note, at: 0)
+        selectedTabID = targetTabID
+        self.selectedNoteID = note.id
         saveNotes()
     }
 

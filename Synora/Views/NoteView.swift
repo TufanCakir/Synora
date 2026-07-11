@@ -19,11 +19,16 @@ struct NoteView: View {
 
     @State private var path = NavigationPath()
     @State private var isRenamingTab = false
+    @State private var isRenamingNote = false
     @State private var renamedTabTitle = ""
+    @State private var renamedNoteTitle = ""
+    @State private var renamedNoteID: Note.ID?
+    @State private var renamedNoteTabID: NoteTab.ID?
     @State private var searchText = ""
     @State private var limitAlertMessage = ""
     @State private var isShowingLimitAlert = false
     @State private var isShowingSettings = false
+    @State private var isShowingOnboarding = false
 
     private enum Route: Hashable {
         case editor(Note.ID)
@@ -43,8 +48,14 @@ struct NoteView: View {
                     addTabIfAllowed()
                 },
                 onSelectNote: selectNote,
+                onRenameNote: prepareRenameNote,
+                onDeleteNote: deleteNote,
+                onMoveNotes: moveStartNotes,
                 onSettings: {
                     isShowingSettings = true
+                },
+                onShowOnboarding: {
+                    isShowingOnboarding = true
                 },
                 onShowTabs: {
                     path.append(Route.tabs)
@@ -64,10 +75,31 @@ struct NoteView: View {
                 }
             )
         }
+        .sheet(isPresented: $isShowingOnboarding) {
+            OnboardingView(
+                onFinish: {
+                    isShowingOnboarding = false
+                },
+                language: viewModel.language
+            )
+        }
         .alert(viewModel.language.text(.rename), isPresented: $isRenamingTab) {
             TextField(viewModel.language.text(.title), text: $renamedTabTitle)
             Button(viewModel.language.text(.save)) {
                 viewModel.renameSelectedTab(to: renamedTabTitle)
+            }
+            Button(viewModel.language.text(.cancel), role: .cancel) {}
+        }
+        .alert(viewModel.language.text(.rename), isPresented: $isRenamingNote) {
+            TextField(viewModel.language.text(.title), text: $renamedNoteTitle)
+            Button(viewModel.language.text(.save)) {
+                if let renamedNoteID, let renamedNoteTabID {
+                    viewModel.renameNote(
+                        id: renamedNoteID,
+                        in: renamedNoteTabID,
+                        to: renamedNoteTitle
+                    )
+                }
             }
             Button(viewModel.language.text(.cancel), role: .cancel) {}
         }
@@ -107,14 +139,7 @@ struct NoteView: View {
                         )
                     }
                     .contextMenu {
-                        Button(
-                            viewModel.language.text(.rename),
-                            systemImage: "pencil"
-                        ) {
-                            renamedTabTitle = viewModel.displayTitle(for: tab)
-                            viewModel.selectedTabID = tab.id
-                            isRenamingTab = true
-                        }
+                        renameTabButton(tab)
                         Button(
                             viewModel.language.text(.delete),
                             systemImage: "trash",
@@ -127,6 +152,20 @@ struct NoteView: View {
                                     at: IndexSet(integer: index)
                                 )
                             }
+                        }
+                    }
+                    .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                        renameTabButton(tab)
+                            .tint(.blue)
+                    }
+                    .swipeActions(edge: .trailing) {
+                        Button(role: .destructive) {
+                            viewModel.deleteTab(id: tab.id)
+                        } label: {
+                            Label(
+                                viewModel.language.text(.delete),
+                                systemImage: "trash"
+                            )
                         }
                     }
                 }
@@ -174,9 +213,49 @@ struct NoteView: View {
                             ? note.style.markerColor.color.opacity(0.18)
                             : Color.clear
                     )
+                    .contextMenu {
+                        Button(
+                            viewModel.language.text(.rename),
+                            systemImage: "pencil"
+                        ) {
+                            prepareRenameNote(note)
+                        }
+                        moveNoteMenu(note)
+                        Button(
+                            viewModel.language.text(.delete),
+                            systemImage: "trash",
+                            role: .destructive
+                        ) {
+                            viewModel.deleteNote(id: note.id)
+                        }
+                    }
+                    .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                        Button {
+                            prepareRenameNote(note)
+                        } label: {
+                            Label(
+                                viewModel.language.text(.rename),
+                                systemImage: "pencil"
+                            )
+                        }
+                        .tint(.blue)
+
+                        moveNoteMenu(note)
+                            .tint(.indigo)
+                    }
+                    .swipeActions(edge: .trailing) {
+                        Button(role: .destructive) {
+                            viewModel.deleteNote(id: note.id)
+                        } label: {
+                            Label(
+                                viewModel.language.text(.delete),
+                                systemImage: "trash"
+                            )
+                        }
+                    }
                 }
-                .onDelete(perform: viewModel.deleteNotes)
-                .onMove(perform: viewModel.moveNotes)
+                .onDelete(perform: deleteDisplayedNotes)
+                .onMove(perform: moveDisplayedNotes)
 
                 if filteredSelectedNotes.isEmpty, !searchText.isEmpty {
                     ContentUnavailableView.search(text: searchText)
@@ -292,7 +371,6 @@ struct NoteView: View {
                 )
             }
         }
-        .sorted { $0.note.updatedAt > $1.note.updatedAt }
     }
 
     private func displayNote(_ note: Note) -> Note {
@@ -300,6 +378,106 @@ struct NoteView: View {
         displayNote.title = viewModel.displayTitle(for: note)
         displayNote.body = viewModel.displayBody(for: note)
         return displayNote
+    }
+
+    private func renameTabButton(_ tab: NoteTab) -> some View {
+        Button(
+            viewModel.language.text(.rename),
+            systemImage: "pencil"
+        ) {
+            renamedTabTitle = viewModel.displayTitle(for: tab)
+            viewModel.selectedTabID = tab.id
+            isRenamingTab = true
+        }
+    }
+
+    private func moveNoteMenu(_ note: Note) -> some View {
+        Menu {
+            ForEach(viewModel.document.tabs) { tab in
+                Button {
+                    viewModel.selectedNoteID = note.id
+                    viewModel.moveSelectedNote(to: tab.id)
+                } label: {
+                    Label(
+                        viewModel.displayTitle(for: tab),
+                        systemImage: tab.id == viewModel.selectedTabID
+                            ? "checkmark" : "folder"
+                    )
+                }
+                .disabled(tab.id == viewModel.selectedTabID)
+            }
+        } label: {
+            Label(
+                viewModel.language == .german ? "Verschieben" : "Move",
+                systemImage: "folder"
+            )
+        }
+    }
+
+    private func deleteDisplayedNotes(at offsets: IndexSet) {
+        let notes = filteredSelectedNotes
+        for index in offsets where notes.indices.contains(index) {
+            viewModel.deleteNote(id: notes[index].id)
+        }
+    }
+
+    private func moveDisplayedNotes(from source: IndexSet, to destination: Int)
+    {
+        guard searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        else {
+            return
+        }
+
+        viewModel.moveNotes(from: source, to: destination)
+    }
+
+    private func prepareRenameNote(_ row: NoteMenuRow) {
+        renamedNoteID = row.note.id
+        renamedNoteTabID = row.tabID
+        renamedNoteTitle = row.noteTitle
+        isRenamingNote = true
+    }
+
+    private func prepareRenameNote(_ note: Note) {
+        renamedNoteID = note.id
+        renamedNoteTabID = viewModel.selectedTabID
+        renamedNoteTitle = viewModel.displayTitle(for: note)
+        isRenamingNote = true
+    }
+
+    private func deleteNote(_ row: NoteMenuRow) {
+        viewModel.deleteNote(id: row.note.id, in: row.tabID)
+    }
+
+    private func moveStartNotes(from source: IndexSet, to destination: Int) {
+        var displayedRows = Array(allNoteRows.prefix(8))
+        let movingRows = source.sorted().compactMap { index in
+            displayedRows.indices.contains(index) ? displayedRows[index] : nil
+        }
+        guard let movingRow = movingRows.first else { return }
+
+        for index in source.sorted(by: >)
+        where displayedRows.indices.contains(index) {
+            displayedRows.remove(at: index)
+        }
+
+        let removedBeforeDestination = source.filter { $0 < destination }.count
+        let insertionIndex = max(
+            0,
+            min(displayedRows.count, destination - removedBeforeDestination)
+        )
+        let targetRow =
+            displayedRows.indices.contains(insertionIndex)
+            ? displayedRows[insertionIndex]
+            : nil
+        let fallbackTargetTabID = displayedRows.last?.tabID ?? movingRow.tabID
+
+        viewModel.moveNote(
+            id: movingRow.note.id,
+            from: movingRow.tabID,
+            to: targetRow?.tabID ?? fallbackTargetTabID,
+            before: targetRow?.note.id
+        )
     }
 
     private func selectNote(_ row: NoteMenuRow) {
@@ -403,7 +581,11 @@ private struct StartView: View {
     let onNewNote: () -> Void
     let onNewTab: () -> Void
     let onSelectNote: (NoteMenuRow) -> Void
+    let onRenameNote: (NoteMenuRow) -> Void
+    let onDeleteNote: (NoteMenuRow) -> Void
+    let onMoveNotes: (IndexSet, Int) -> Void
     let onSettings: () -> Void
+    let onShowOnboarding: () -> Void
     let onShowTabs: () -> Void
 
     var body: some View {
@@ -425,7 +607,7 @@ private struct StartView: View {
             }
 
             Section(viewModel.language.text(.recentNotes)) {
-                ForEach(noteRows.prefix(8)) { row in
+                ForEach(displayedRows) { row in
                     Button {
                         onSelectNote(row)
                     } label: {
@@ -437,7 +619,51 @@ private struct StartView: View {
                                 .foregroundStyle(.secondary)
                         }
                     }
+                    .contextMenu {
+                        Button(
+                            viewModel.language.text(.rename),
+                            systemImage: "pencil"
+                        ) {
+                            onRenameNote(row)
+                        }
+
+                        Button(
+                            viewModel.language.text(.delete),
+                            systemImage: "trash",
+                            role: .destructive
+                        ) {
+                            onDeleteNote(row)
+                        }
+                    }
+                    .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                        Button {
+                            onRenameNote(row)
+                        } label: {
+                            Label(
+                                viewModel.language.text(.rename),
+                                systemImage: "pencil"
+                            )
+                        }
+                        .tint(.blue)
+                    }
+                    .swipeActions(edge: .trailing) {
+                        Button(role: .destructive) {
+                            onDeleteNote(row)
+                        } label: {
+                            Label(
+                                viewModel.language.text(.delete),
+                                systemImage: "trash"
+                            )
+                        }
+                    }
                 }
+                .onDelete { offsets in
+                    let rows = displayedRows
+                    for index in offsets where rows.indices.contains(index) {
+                        onDeleteNote(rows[index])
+                    }
+                }
+                .onMove(perform: onMoveNotes)
 
                 if noteRows.isEmpty {
                     ContentUnavailableView(
@@ -449,7 +675,19 @@ private struct StartView: View {
             }
         }
         .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                EditButton()
+            }
+
             ToolbarItemGroup(placement: .topBarTrailing) {
+                Button(action: onShowOnboarding) {
+                    Label(
+                        viewModel.language == .german
+                            ? "Einführung" : "Onboarding",
+                        systemImage: "questionmark.circle"
+                    )
+                }
+
                 Button(action: onShowTabs) {
                     Label(
                         viewModel.language.text(.tabs),
@@ -465,6 +703,10 @@ private struct StartView: View {
                 }
             }
         }
+    }
+
+    private var displayedRows: [NoteMenuRow] {
+        Array(noteRows.prefix(8))
     }
 }
 
